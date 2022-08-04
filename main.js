@@ -1,5 +1,5 @@
 import { run } from "/src/run.js";
-import * as program from "/program3.js";
+import * as program from "/collapse.js";
 
 run(program, { element: document.querySelector("pre") })
     .then(function (e) {})
