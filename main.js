@@ -1,4 +1,4 @@
-import { run } from "/src/run.js";
+import * as Run from "/src/run.js";
 import * as raymarch from "/experiments/01-raymarch";
 import * as waves from "/experiments/02-waves";
 import * as wfc from "/experiments/03-wfc";
@@ -20,7 +20,7 @@ switch (mode) {
         break;
 }
 
-run(program, { element: document.querySelector("pre") })
+Run.run(program, { element: document.querySelector("pre") })
     .then(function (e) {})
     .catch(function (e) {
         console.warn(e.message);

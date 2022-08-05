@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@rollup/plugin-alias": "^3.1.9",
     "prettier": "^2.7.1",
     "vite": "^3.0.0"
   }
