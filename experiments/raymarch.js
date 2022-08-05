@@ -2,7 +2,7 @@
 @author kurishutofu
 @title  Raymarch
 @version 0.0.1
-@url https://github.com/stofi/ascii-play/blob/master/experiments/raymarch/
+@url https://github.com/stofi/ascii-play/
 
 Distance functions are based on Inigo Quilez https://iquilezles.org/articles/distfunctions/
 

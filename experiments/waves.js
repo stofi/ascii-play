@@ -2,7 +2,7 @@
 @author kurishutofu
 @title  Waves
 @version 0.0.1
-@url https://github.com/stofi/ascii-play/blob/master/experiments/waves/
+@url https://github.com/stofi/ascii-play/
 
 # Older versions
 - 0.0.0: https://play.ertdfgcvb.xyz/#/1659700118738

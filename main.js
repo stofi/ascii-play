@@ -1,5 +1,5 @@
 import { run } from "/src/run.js";
-import * as program from "/experiments/wfc";
+import * as program from "/experiments/raymarch";
 
 run(program, { element: document.querySelector("pre") })
     .then(function (e) {})
