@@ -1,81 +1,181 @@
 /**
 @author kurishutofu
 @title  Wave Function Collapse
-@version 0.0.2
+@version 0.0.4
 @description Implementation of the Wave Function Collapse algorithm. 
 
-Click to start, collapse a tile or to restart.
+# How to use
+Click to start, collapse a slot or to restart.
+
+# Older versions
+- 0.0.3: https://play.ertdfgcvb.xyz/#/1659698366218
 
 */
+
+const DISABLE_FLASHING = true;
+const TILES_SINGLE = true;
+const TILES_DOUBLE = true;
+const TILES_FULL = true;
+const TILES_DOUBLE_SINGLE = false;
+const TILES_FULL_SINGLE = false;
+
 export const settings = {
-    backgroundColor: "black",
-    color: "#fffefc",
+    backgroundColor: "#03071e",
+    color: "#ffba08",
     restoreState: false,
     fontSize: "2rem",
-    fps: 10,
+    // fps: 10,
 };
 
 class Tile {
-    static get library() {
-        const seed = (char, top, right, bottom, left) => ({
-            char,
-            sockets: {
-                top,
-                right,
-                bottom,
-                left,
-            },
-        });
+    constructor(char, top, right, bottom, left, color = 0) {
+        this.char = char;
+        this.sockets = {
+            top,
+            right,
+            bottom,
+            left,
+        };
+        this.color = color;
+    }
+}
 
-        return [
-            seed(" ", 0, 0, 0, 0),
-            seed("╗", 0, 0, 2, 2),
-            seed("╔", 0, 2, 2, 0),
-            seed("╝", 2, 0, 0, 2),
-            seed("╚", 2, 2, 0, 0),
-            seed("╬", 2, 2, 2, 2),
-            seed("╠", 2, 2, 2, 0),
-            seed("╣", 2, 0, 2, 2),
-            seed("╩", 2, 2, 0, 2),
-            seed("╦", 0, 2, 2, 2),
-            seed("║", 2, 0, 2, 0),
-            seed("═", 0, 2, 0, 2),
-            seed("╕", 0, 0, 1, 2),
-            seed("╒", 0, 2, 1, 0),
-            seed("╛", 1, 0, 0, 2),
-            seed("╘", 1, 2, 0, 0),
-            seed("╪", 1, 2, 1, 2),
-            seed("╞", 1, 2, 1, 0),
-            seed("╡", 1, 0, 1, 2),
-            seed("╧", 1, 2, 0, 2),
-            seed("╤", 0, 2, 1, 2),
-            seed("╖", 0, 0, 2, 1),
-            seed("╓", 0, 1, 2, 0),
-            seed("╜", 2, 0, 0, 1),
-            seed("╙", 2, 1, 0, 0),
-            seed("╫", 2, 1, 2, 1),
-            seed("╟", 2, 1, 2, 0),
-            seed("╢", 2, 0, 2, 1),
-            seed("╨", 2, 1, 0, 1),
-            seed("╥", 0, 1, 2, 1),
-            seed("┐", 0, 0, 1, 1),
-            seed("┌", 0, 1, 1, 0),
-            seed("┘", 1, 0, 0, 1),
-            seed("└", 1, 1, 0, 0),
-            seed("┼", 1, 1, 1, 1),
-            seed("├", 1, 1, 1, 0),
-            seed("┤", 1, 0, 1, 1),
-            seed("┴", 1, 1, 0, 1),
-            seed("┬", 0, 1, 1, 1),
-            seed("│", 1, 0, 1, 0),
-        ];
+const templates = [
+    [" ", 0, 0, 0, 0, 0],
+    // ["H", 0, 4, 0, 0, 0],
+    // ["E", 0, 5, 0, 4, 0],
+    // ["L", 0, 6, 0, 5, 0],
+    // ["O", 0, 0, 0, 6, 0],
+];
+
+if (TILES_SINGLE) {
+    templates.push(
+        ["┐", 0, 0, 1, 1, 1],
+        ["┌", 0, 1, 1, 0, 1],
+        ["┘", 1, 0, 0, 1, 1],
+        ["└", 1, 1, 0, 0, 1],
+        ["┼", 1, 1, 1, 1, 1],
+        ["├", 1, 1, 1, 0, 1],
+        ["┤", 1, 0, 1, 1, 1],
+        ["┴", 1, 1, 0, 1, 1],
+        ["┬", 0, 1, 1, 1, 1],
+        ["│", 1, 0, 1, 0, 1],
+        ["─", 0, 1, 0, 1, 1],
+        ["╮", 0, 0, 1, 1, 1],
+        ["╭", 0, 1, 1, 0, 1],
+        ["╯", 1, 0, 0, 1, 1],
+        ["╰", 1, 1, 0, 0, 1]
+    );
+}
+if (TILES_DOUBLE) {
+    templates.push(
+        ["╗", 0, 0, 2, 2, 2],
+        ["╔", 0, 2, 2, 0, 2],
+        ["╝", 2, 0, 0, 2, 2],
+        ["╚", 2, 2, 0, 0, 2],
+        ["╬", 2, 2, 2, 2, 2],
+        ["╠", 2, 2, 2, 0, 2],
+        ["╣", 2, 0, 2, 2, 2],
+        ["╩", 2, 2, 0, 2, 2],
+        ["╦", 0, 2, 2, 2, 2],
+        ["║", 2, 0, 2, 0, 2],
+        ["═", 0, 2, 0, 2, 2]
+    );
+}
+if (TILES_DOUBLE_SINGLE) {
+    templates.push(
+        ["╕", 0, 0, 1, 2, 2],
+        ["╒", 0, 2, 1, 0, 2],
+        ["╛", 1, 0, 0, 2, 2],
+        ["╘", 1, 2, 0, 0, 2],
+        ["╪", 1, 2, 1, 2, 2],
+        ["╞", 1, 2, 1, 0, 2],
+        ["╡", 1, 0, 1, 2, 2],
+        ["╧", 1, 2, 0, 2, 2],
+        ["╤", 0, 2, 1, 2, 2],
+        ["╖", 0, 0, 2, 1, 2],
+        ["╓", 0, 1, 2, 0, 2],
+        ["╜", 2, 0, 0, 1, 2],
+        ["╙", 2, 1, 0, 0, 2],
+        ["╫", 2, 1, 2, 1, 2],
+        ["╟", 2, 1, 2, 0, 2],
+        ["╢", 2, 0, 2, 1, 2],
+        ["╨", 2, 1, 0, 1, 2],
+        ["╥", 0, 1, 2, 1, 2]
+    );
+}
+if (TILES_FULL) {
+    templates.push(
+        ["┓", 0, 0, 3, 3, 3],
+        ["┏", 0, 3, 3, 0, 3],
+        ["┛", 3, 0, 0, 3, 3],
+        ["┗", 3, 3, 0, 0, 3],
+        ["╋", 3, 3, 3, 3, 3],
+        ["┣", 3, 3, 3, 0, 3],
+        ["┫", 3, 0, 3, 3, 3],
+        ["┻", 3, 3, 0, 3, 3],
+        ["┳", 0, 3, 3, 3, 3],
+        ["┃", 3, 0, 3, 0, 3],
+        ["━", 0, 3, 0, 3, 3]
+    );
+}
+if (TILES_FULL_SINGLE) {
+    templates.push(
+        ["┮", 0, 3, 1, 1, 3],
+        ["┭", 0, 1, 1, 3, 3],
+        ["┵", 1, 1, 0, 3, 3],
+        ["┶", 1, 3, 0, 1, 3],
+        ["╼", 0, 3, 0, 1, 3],
+        ["╾", 0, 1, 0, 3, 3],
+        ["╽", 1, 0, 3, 0, 3],
+        ["╿", 3, 0, 1, 0, 3],
+        ["┑", 0, 0, 1, 3, 3],
+        ["┍", 0, 3, 1, 0, 3],
+        ["┙", 1, 0, 0, 3, 3],
+        ["┕", 1, 3, 0, 0, 3],
+        ["┿", 1, 3, 1, 3, 3],
+        ["┝", 1, 3, 1, 0, 3],
+        ["┥", 1, 0, 1, 3, 3],
+        ["┷", 1, 3, 0, 3, 3],
+        ["┯", 0, 3, 1, 3, 3],
+        ["┒", 0, 0, 3, 1, 3],
+        ["┎", 0, 1, 3, 0, 3],
+        ["┚", 3, 0, 0, 1, 3],
+        ["┖", 3, 1, 0, 0, 3],
+        ["╂", 3, 1, 3, 1, 3],
+        ["┠", 3, 1, 3, 0, 3],
+        ["┨", 3, 0, 3, 1, 3],
+        ["┸", 3, 1, 0, 1, 3],
+        ["┰", 0, 1, 3, 1, 3],
+        ["╇", 3, 3, 1, 3, 3],
+        ["╈", 1, 3, 3, 3, 3],
+        ["╉", 3, 1, 3, 3, 3],
+        ["╊", 3, 3, 3, 1, 3],
+        ["╃", 3, 1, 1, 3, 3],
+        ["╄", 3, 3, 1, 1, 3],
+        ["╅", 1, 1, 3, 3, 3],
+        ["╆", 1, 3, 3, 1, 3],
+        ["┽", 1, 1, 1, 3, 3],
+        ["┾", 1, 3, 1, 1, 3],
+        ["╀", 3, 1, 1, 1, 3],
+        ["╁", 1, 1, 1, 1, 3],
+        ["┡", 3, 3, 1, 0, 3],
+        ["┢", 1, 3, 3, 0, 3],
+        ["┩", 3, 0, 1, 3, 3],
+        ["┪", 1, 0, 3, 3, 3],
+        ["┞", 3, 1, 3, 0, 3],
+        ["┟", 1, 1, 3, 0, 3],
+        ["┦", 3, 0, 1, 1, 3],
+        ["┧", 1, 0, 3, 1, 3]
+    );
+}
+
+class Library {
+    static map = new Map(templates.map((t) => [t[0], new Tile(...t)]));
+    static get tiles() {
+        return [...Library.map.values()];
     }
-    static compare(a, b) {
-        if (!a || !a.getEntropy) return 1;
-        if (!b || !b.getEntropy) return -1;
-        return a.getEntropy() - b.getEntropy();
-    }
-    static reverse(direction) {
+    static reverseDirection(direction) {
         return direction === "top"
             ? "bottom"
             : direction === "right"
@@ -86,48 +186,87 @@ class Tile {
             ? "right"
             : null;
     }
-    constructor(x, y) {
+    static getValidTilesForSocketsInDirection(
+        sockets,
+        direction,
+        tileset = Library.tiles
+    ) {
+        if (!sockets || !sockets.length) return [...tileset];
+
+        const validTiles = tileset.filter((tile) =>
+            sockets.includes(tile.sockets[Library.reverseDirection(direction)])
+        );
+        return validTiles;
+    }
+
+    static getValidTiles({ top, right, bottom, left }) {
+        const topTiles = Library.getValidTilesForSocketsInDirection(
+            [...new Set(top)],
+            "bottom"
+        );
+        const rightTiles = Library.getValidTilesForSocketsInDirection(
+            [...new Set(right)],
+            "left",
+            topTiles
+        );
+
+        const bottomTiles = Library.getValidTilesForSocketsInDirection(
+            [...new Set(bottom)],
+            "top",
+            rightTiles
+        );
+        const leftTiles = Library.getValidTilesForSocketsInDirection(
+            [...new Set(left)],
+            "right",
+            bottomTiles
+        );
+        return leftTiles;
+    }
+    get tiles() {
+        return Library.tiles;
+    }
+}
+
+class Slot {
+    static compare(a, b) {
+        if (!a || !a.getEntropy) return 1;
+        if (!b || !b.getEntropy) return -1;
+        return a.getEntropy() - b.getEntropy();
+    }
+
+    constructor(x, y, tiles) {
         this.x = x;
         this.y = y;
         this.collapsed = false;
-        this.options = [...Tile.library];
+        this.tiles = tiles;
     }
     getEntropy() {
-        return this.options.length;
+        return this.tiles.length;
     }
     getRandomOption() {
-        return this.options[Math.floor(Math.random() * this.options.length)];
+        return this.tiles[Math.floor(Math.random() * this.tiles.length)];
     }
     collapse(id) {
         this.collapsed = true;
-        const choosen = this.options[id];
+        const choosen = this.tiles[id];
         if (!choosen) {
-            this.options = [this.getRandomOption()];
+            this.tiles = [this.getRandomOption()];
         } else {
-            this.options = [choosen];
+            this.tiles = [choosen];
         }
     }
-    getValidTiles(direction) {
-        const validSockets = new Set();
-        this.options.forEach((option) => {
-            if (option.sockets[direction] !== undefined)
-                validSockets.add(option.sockets[direction]);
-        });
-        return Tile.library.filter((tile) =>
-            [...validSockets].includes(tile.sockets[Tile.reverse(direction)])
-        );
-    }
+
     clone() {
-        const clone = new Tile(this.x, this.y);
+        const clone = new Slot(this.x, this.y, this.tiles);
         clone.collapsed = this.collapsed;
-        clone.options = [...this.options];
         return clone;
     }
 }
 
 class WFC {
-    static pickRandomTile(tiles) {
-        return tiles[Math.floor(Math.random() * tiles.length)];
+    library = new Library();
+    static pickRandomSlot(slots) {
+        return slots[Math.floor(Math.random() * slots.length)];
     }
     constructor() {
         this.map = new Map();
@@ -143,8 +282,8 @@ class WFC {
     get(x, y) {
         return this.map.get(`${x},${y}`);
     }
-    set(x, y, tile) {
-        this.map.set(`${x},${y}`, tile);
+    set(x, y, slot) {
+        this.map.set(`${x},${y}`, slot);
     }
 
     initialize({ cols, rows }) {
@@ -154,79 +293,66 @@ class WFC {
         this.clear();
         for (let i = 0; i < cols; i++) {
             for (let j = 0; j < rows; j++) {
-                this.set(i, j, new Tile(i, j));
+                this.set(i, j, new Slot(i, j, this.library.tiles));
             }
         }
     }
-    collapseTile(x, y, id = null) {
-        const tile = this.get(x, y);
-        if (tile.collapsed) return;
-        tile.collapse(id);
-        this.collapsedThisGen.push(tile);
+    collapseSlot(x, y, id = null) {
+        const slot = this.get(x, y);
+        if (slot.collapsed) return;
+        slot.collapse(id);
+        this.collapsedThisGen.push(slot);
     }
 
-    collapseTileManual(x, y) {
-        const tile = this.get(x, y);
-        this.updateTileOptions(x, y, tile);
-        this.collapseTile(x, y);
+    collapseSlotManual(x, y) {
+        const slot = this.get(x, y);
+        this.updateSlotOptions(x, y, slot);
+        this.collapseSlot(x, y);
     }
-    getSortedTiles() {
+    getSortedSlots() {
         return [...this.map.values()]
-            .filter((tile) => !tile.collapsed)
-            .sort(Tile.compare);
+            .filter((slot) => !slot.collapsed)
+            .sort(Slot.compare);
     }
-    getTilesWithLowestEntropy() {
-        const sorted = this.getSortedTiles();
+    getSlotsWithLowestEntropy() {
+        const sorted = this.getSortedSlots();
         if (sorted.length === 0) {
             this.done = true;
             return [];
         }
         const lowest = sorted[0].getEntropy();
-        return sorted.filter((tile) => tile.getEntropy() === lowest);
+        return sorted.filter((slot) => slot.getEntropy() === lowest);
     }
-    updateTileOptions(i, j, tile) {
-        // if (!tile) return;
-        const empty = Tile.library[0];
-        const top = this.get(i, j - 1);
-        const right = this.get(i + 1, j);
-        const bottom = this.get(i, j + 1);
-        const left = this.get(i - 1, j);
-        const topValid = top ? top.getValidTiles("bottom") : [empty];
-        const rightValid = right ? right.getValidTiles("left") : [empty];
-        const bottomValid = bottom ? bottom.getValidTiles("top") : [empty];
-        const leftValid = left ? left.getValidTiles("right") : [empty];
+    updateSlotOptions(x, y, slot) {
+        // if (!slot) return;
+        const empty = this.library.tiles[0];
+        const top = this.get(x, y - 1);
+        const right = this.get(x + 1, y);
+        const bottom = this.get(x, y + 1);
+        const left = this.get(x - 1, y);
+        const valid = Library.getValidTiles({
+            top: top ? top.tiles.map((tile) => tile.sockets.bottom) : [],
+            right: right ? right.tiles.map((tile) => tile.sockets.left) : [],
+            bottom: bottom ? bottom.tiles.map((tile) => tile.sockets.top) : [],
+            left: left ? left.tiles.map((tile) => tile.sockets.right) : [],
+        });
 
-        const valid = tile.options.filter(
-            (tile) =>
-                topValid.some((t) => t.char === tile.char) &&
-                rightValid.some((t) => t.char === tile.char) &&
-                bottomValid.some((t) => t.char === tile.char) &&
-                leftValid.some((t) => t.char === tile.char)
-        );
         if (valid.length === 0) {
-            valid.push({
-                char: "x",
-                sockets: {
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                    left: 0,
-                },
-            });
+            valid.push(new Tile("x", 0, 0, 0, 0));
         }
 
-        tile.options = valid;
+        slot.tiles = valid;
     }
     createNewGeneration() {
         const nextGeneration = new Map();
-        const set = (x, y, tile) => nextGeneration.set(`${x},${y}`, tile);
+        const set = (x, y, slot) => nextGeneration.set(`${x},${y}`, slot);
 
         for (let i = 0; i < this.size.x; i++) {
             for (let j = 0; j < this.size.y; j++) {
-                const tile = this.get(i, j).clone();
-                if (!tile.collapsed) this.updateTileOptions(i, j, tile);
+                const slot = this.get(i, j).clone();
+                if (!slot.collapsed) this.updateSlotOptions(i, j, slot);
 
-                set(i, j, tile);
+                set(i, j, slot);
             }
         }
         this.map = nextGeneration;
@@ -234,16 +360,16 @@ class WFC {
     }
     step() {
         this.createNewGeneration();
-        const tiles = this.getTilesWithLowestEntropy();
+        const slots = this.getSlotsWithLowestEntropy();
 
-        if (tiles.length === 0) return;
-        const entropy = tiles[0].getEntropy();
+        if (slots.length === 0) return;
+        const entropy = slots[0].getEntropy();
 
         if (entropy === 1) {
-            tiles.forEach((tile) => this.collapseTile(tile.x, tile.y));
+            slots.forEach((slot) => this.collapseSlot(slot.x, slot.y));
         } else {
-            const random = WFC.pickRandomTile(tiles);
-            this.collapseTile(random.x, random.y);
+            const random = WFC.pickRandomSlot(slots);
+            this.collapseSlot(random.x, random.y);
         }
     }
 }
@@ -253,10 +379,29 @@ class Experience {
     clicked = false;
     running = false;
     started = false;
+    frameRandom = 0;
+
+    banner({ cols, rows }) {
+        for (let x = 0; x < cols; x++) {
+            for (let y = 0; y < rows; y++) {
+                const text = "CHAOS TO ORDER";
+                const x1 = ~~(cols / 2 - text.length / 2);
+                const y1 = ~~(rows / 2);
+                if (y === y1 && x >= x1 && x < x1 + text.length) {
+                    // char = text[x - x1];
+                    const tile = new Tile(text[x - x1], 0, 0, 0, 0);
+                    this.map.set(x, y, new Slot(x, y, [tile]));
+                    this.map.collapseSlot(x, y);
+                }
+            }
+        }
+    }
 
     pre({ cols, rows }, { x, y, pressed }) {
+        this.frameRandom = Math.random();
         if (this.map.size.x !== cols || this.map.size.y !== rows) {
             this.map.initialize({ cols, rows });
+            this.banner({ cols, rows });
             this.running = false;
         }
         if (this.running) {
@@ -270,10 +415,11 @@ class Experience {
             this.started = true;
             if (this.map.done) {
                 this.map.initialize({ cols, rows });
+                this.banner({ cols, rows });
             }
-            this.map.collapseTileManual(~~x, ~~y);
+            this.map.collapseSlotManual(~~x, ~~y);
         } else if (this.clicked && this.running) {
-            this.map.collapseTileManual(~~x, ~~y);
+            this.map.collapseSlotManual(~~x, ~~y);
             this.clicked = false;
         }
         if (this.map.done) {
@@ -284,29 +430,46 @@ class Experience {
     main({ x, y }, { cols, rows }) {
         let char = null;
 
-        const text = "CHAOS TO ORDER";
-        const x1 = ~~(cols / 2 - text.length / 2);
-        const y1 = ~~(rows / 2);
-        if (y === y1 && x >= x1 && x < x1 + text.length) {
-            char = text[x - x1];
-        }
-
-        const tile = this.map.get(x, y);
-        if (!tile) return " ";
-        const tileChar = !tile.collapsed
-            ? tile.options[~~(tile.options.length * Math.random())].char
-            : tile.options[0].char;
+        const slot = this.map.get(x, y);
+        if (!slot || !slot.tiles || !slot.tiles.length) return " ";
+        const index = !DISABLE_FLASHING
+            ? ~~(slot.tiles.length * Math.random())
+            : 0;
+        const slotChar = !slot.collapsed
+            ? slot.tiles[index].char
+            : slot.tiles[0].char;
 
         const v =
-            ~~((tile ? tile.getEntropy() / Tile.library.length : 0) * 10) / 10;
-        return {
-            char: char && !tile.collapsed ? char : v == 1 ? "" : tileChar,
+            ~~(
+                (slot ? slot.getEntropy() / this.map.library.tiles.length : 0) *
+                10
+            ) / 10;
+        const out = {
+            char: char && !slot.collapsed ? char : v == 1 ? "" : slotChar,
+            color: slot.collapsed ? settings.color : "gray",
         };
+        if (slot.collapsed) {
+            // slot.tiles[0].color;
+            switch (slot.tiles[0].color) {
+                case 1:
+                    out.color = "#e85d04";
+                    break;
+                case 2:
+                    out.color = "#dc2f02";
+                    break;
+                case 3:
+                    out.color = "#9d0208";
+                    break;
+                default:
+                    break;
+            }
+        }
+        return out;
     }
 }
 
 const experience = new Experience();
-window.experience = experience;
+
 export function pre(context, cursor) {
     experience.pre(context, cursor);
 }
