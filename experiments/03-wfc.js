@@ -1,7 +1,7 @@
 /**
 @author kurishutofu
 @title  Wave Function Collapse
-@version 0.0.5
+@version 0.0.6
 @description Implementation of the Wave Function Collapse algorithm.
 @url https://github.com/stofi/ascii-play/
 
@@ -11,6 +11,7 @@ Click to start, collapse a slot or to restart.
 # Older versions
 - 0.0.3: https://play.ertdfgcvb.xyz/#/1659698366218
 - 0.0.4: https://play.ertdfgcvb.xyz/#/1659704759466
+- 0.0.5: https://play.ertdfgcvb.xyz/#/1659719329521
 
 */
 
