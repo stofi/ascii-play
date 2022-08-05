@@ -33,11 +33,15 @@ $ vite dev --mode wfc
 ## Experiments
 
 ### [01. Raymarching](experiments/01-raymarch.js)
+[Playground](https://play.ertdfgcvb.xyz/#/1659704731657)
 Using [raymarching](https://en.wikipedia.org/wiki/Raymarching) to render 3D shapes from signed distance functions.
 
 ### [02. Perlin Noise Waves](experiments/02-waves.js)
+[Playground](https://play.ertdfgcvb.xyz/#/1659704635202)
 Simple wave pattern based on Perlin noise. (Implementation of noise is not mine)
 
 ### [03. Wave Function Collapse](experiments/03-wfc.js)
+[Playground](https://play.ertdfgcvb.xyz/#/1659704759466)
+Wave function collapse experiment.
 
 
