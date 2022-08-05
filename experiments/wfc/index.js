@@ -2,7 +2,8 @@
 @author kurishutofu
 @title  Wave Function Collapse
 @version 0.0.4
-@description Implementation of the Wave Function Collapse algorithm. 
+@description Implementation of the Wave Function Collapse algorithm.
+@url https://github.com/stofi/ascii-play/blob/master/experiments/wfc/
 
 # How to use
 Click to start, collapse a slot or to restart.

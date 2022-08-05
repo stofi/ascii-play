@@ -1,10 +1,12 @@
 /**
 @author kurishutofu
 @title  Waves
+@version 0.0.1
+@url https://github.com/stofi/ascii-play/blob/master/experiments/waves/
 
-Distance functions are based on Inigo Quilez https://iquilezles.org/articles/distfunctions/
+# Older versions
+- 0.0.0: https://play.ertdfgcvb.xyz/#/1659700118738
 
-!video night
 */
 export const settings = {
     backgroundColor: "#323132",

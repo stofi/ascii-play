@@ -1,5 +1,5 @@
 import { run } from "/src/run.js";
-import * as program from "/collapse.js";
+import * as program from "/experiments/wfc";
 
 run(program, { element: document.querySelector("pre") })
     .then(function (e) {})
