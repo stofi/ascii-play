@@ -14,7 +14,7 @@ Click to start, collapse a slot or to restart.
 
 */
 
-const DISABLE_FLASHING = true;
+const DISABLE_FLASHING = false;
 const TILES_SINGLE = true;
 const TILES_DOUBLE = true;
 const TILES_FULL = true;
@@ -30,8 +30,9 @@ export const settings = {
 };
 
 class Tile {
-    constructor(char, top, right, bottom, left, color = 0) {
+    constructor(char, top, right, bottom, left, color = 0, weight) {
         this.char = char;
+        this.weight = weight;
         this.sockets = {
             top,
             right,
@@ -61,8 +62,8 @@ if (TILES_SINGLE) {
         ["┤", 1, 0, 1, 1, 1],
         ["┴", 1, 1, 0, 1, 1],
         ["┬", 0, 1, 1, 1, 1],
-        ["│", 1, 0, 1, 0, 1],
-        ["─", 0, 1, 0, 1, 1],
+        ["│", 1, 0, 1, 0, 1, 100],
+        ["─", 0, 1, 0, 1, 1, 100],
         ["╮", 0, 0, 1, 1, 1],
         ["╭", 0, 1, 1, 0, 1],
         ["╯", 1, 0, 0, 1, 1],
@@ -80,8 +81,8 @@ if (TILES_DOUBLE) {
         ["╣", 2, 0, 2, 2, 2],
         ["╩", 2, 2, 0, 2, 2],
         ["╦", 0, 2, 2, 2, 2],
-        ["║", 2, 0, 2, 0, 2],
-        ["═", 0, 2, 0, 2, 2]
+        ["║", 2, 0, 2, 0, 2, 60],
+        ["═", 0, 2, 0, 2, 2, 60]
     );
 }
 if (TILES_DOUBLE_SINGLE) {
@@ -117,8 +118,8 @@ if (TILES_FULL) {
         ["┫", 3, 0, 3, 3, 3],
         ["┻", 3, 3, 0, 3, 3],
         ["┳", 0, 3, 3, 3, 3],
-        ["┃", 3, 0, 3, 0, 3],
-        ["━", 0, 3, 0, 3, 3]
+        ["┃", 3, 0, 3, 0, 3, 40],
+        ["━", 0, 3, 0, 3, 3, 40]
     );
 }
 if (TILES_FULL_SINGLE) {
@@ -246,7 +247,10 @@ class Slot {
         return this.tiles.length;
     }
     getRandomOption() {
-        return this.tiles[Math.floor(Math.random() * this.tiles.length)];
+        const options = this.tiles
+            .map((tile) => new Array(tile.weight).fill(tile))
+            .flat();
+        return options[Math.floor(Math.random() * options.length)];
     }
     collapse(id) {
         this.collapsed = true;
@@ -308,6 +312,7 @@ class WFC {
 
     collapseSlotManual(x, y) {
         const slot = this.get(x, y);
+        if (slot.collapsed) return;
         this.updateSlotOptions(x, y, slot);
         this.collapseSlot(x, y);
     }
@@ -348,11 +353,24 @@ class WFC {
     createNewGeneration() {
         const nextGeneration = new Map();
         const set = (x, y, slot) => nextGeneration.set(`${x},${y}`, slot);
+        const isInRange = (slot, r = 3) => {
+            const { x, y } = slot;
+            return this.collapsedThisGen.some(
+                (slot) =>
+                    slot.x + r >= x &&
+                    slot.x - r <= x &&
+                    slot.y + r >= y &&
+                    slot.y - r <= y
+            );
+        };
 
         for (let i = 0; i < this.size.x; i++) {
             for (let j = 0; j < this.size.y; j++) {
                 const slot = this.get(i, j).clone();
-                if (!slot.collapsed) this.updateSlotOptions(i, j, slot);
+                if (isInRange(slot)) {
+                    // this.updateSlotOptions(i, j, slot);
+                    if (!slot.collapsed) this.updateSlotOptions(i, j, slot);
+                }
 
                 set(i, j, slot);
             }
@@ -386,12 +404,13 @@ class Experience {
     banner({ cols, rows }) {
         for (let x = 0; x < cols; x++) {
             for (let y = 0; y < rows; y++) {
-                const text = "CHAOS TO ORDER";
-                const x1 = ~~(cols / 2 - text.length / 2);
+                const text = ["CHAOS TO ORDER", "CLICK TO START"];
+                const index = 0;
+                const x1 = ~~(cols / 2 - text[index].length / 2);
                 const y1 = ~~(rows / 2);
-                if (y === y1 && x >= x1 && x < x1 + text.length) {
-                    // char = text[x - x1];
-                    const tile = new Tile(text[x - x1], 0, 0, 0, 0);
+                if (y === y1 && x >= x1 && x < x1 + text[index].length) {
+                    // char = text[index][x - x1];
+                    const tile = new Tile(text[index][x - x1], 0, 0, 0, 0);
                     this.map.set(x, y, new Slot(x, y, [tile]));
                     this.map.collapseSlot(x, y);
                 }
@@ -399,11 +418,11 @@ class Experience {
         }
     }
 
-    pre({ cols, rows }, { x, y, pressed }) {
+    pre({ cols, rows, frame }, { x, y, pressed }) {
         this.frameRandom = Math.random();
         if (this.map.size.x !== cols || this.map.size.y !== rows) {
             this.map.initialize({ cols, rows });
-            this.banner({ cols, rows });
+            this.banner({ cols, rows, frame });
             this.running = false;
         }
         if (this.running) {
@@ -417,7 +436,7 @@ class Experience {
             this.started = true;
             if (this.map.done) {
                 this.map.initialize({ cols, rows });
-                this.banner({ cols, rows });
+                this.banner({ cols, rows, frame });
             }
             this.map.collapseSlotManual(~~x, ~~y);
         } else if (this.clicked && this.running) {
