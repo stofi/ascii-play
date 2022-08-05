@@ -1,22 +1,18 @@
 /**
 @author kurishutofu
 @title  Waves
-@version 0.0.1
+@version 0.0.2
 @url https://github.com/stofi/ascii-play/
 
 # Older versions
 - 0.0.0: https://play.ertdfgcvb.xyz/#/1659700118738
+- 0.0.1: https://play.ertdfgcvb.xyz/#/1659704635202
 
 */
 export const settings = {
     backgroundColor: "#323132",
     color: "#fffefc",
 };
-
-import * as Vec3 from "/src/modules/vec3.js";
-import * as Vec2 from "/src/modules/vec2.js";
-import * as DrawBox from "/src/modules/drawbox.js";
-import GUI from "https://cdn.jsdelivr.net/npm/lil-gui@0.17/+esm";
 
 const perlinNoise3d = (function () {
     // Based on http://mrl.nyu.edu/~perlin/noise/
@@ -216,16 +212,6 @@ const mapRange = (
     return min2 + ((value - min1) * (max2 - min2)) / (max1 - min1);
 };
 
-// const options = {
-//     timeScale: 1,
-//     waveFrequency: 0.2,
-//     waveTime: 0.6,
-//     noiseScale: 0.1,
-//     power: 1.2,
-//     amplitude: 0.8,
-//     frequency: 0.1,
-//     noiseFactor: 7,
-// };
 const options = {
     timeScale: 1,
     noiseScale: 2,
@@ -236,17 +222,17 @@ const options = {
     waveFrequency: 0.2,
     waveTime: 0.6,
 };
-export function boot() {
-    const gui = new GUI();
-    gui.add(options, "timeScale", 0, 5).step(0.01);
-    gui.add(options, "noiseScale", 0, 2).step(0.01);
-    gui.add(options, "power", 0, 3).step(0.01);
-    gui.add(options, "amplitude", 0, 10).step(0.01);
-    gui.add(options, "frequency", 0, 10).step(0.01);
-    gui.add(options, "noiseFactor", 0, 10).step(0.01);
-    gui.add(options, "waveFrequency", 0, 10).step(0.01);
-    gui.add(options, "waveTime", 0, 10).step(0.01);
-}
+// export function boot() {
+//     const gui = new GUI();
+//     gui.add(options, "timeScale", 0, 5).step(0.01);
+//     gui.add(options, "noiseScale", 0, 2).step(0.01);
+//     gui.add(options, "power", 0, 3).step(0.01);
+//     gui.add(options, "amplitude", 0, 10).step(0.01);
+//     gui.add(options, "frequency", 0, 10).step(0.01);
+//     gui.add(options, "noiseFactor", 0, 10).step(0.01);
+//     gui.add(options, "waveFrequency", 0, 10).step(0.01);
+//     gui.add(options, "waveTime", 0, 10).step(0.01);
+// }
 
 export function main(coord, context) {
     const t = (context.time / 1000) * options.timeScale;

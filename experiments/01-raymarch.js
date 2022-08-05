@@ -1,13 +1,15 @@
 /**
 @author kurishutofu
 @title  Raymarch
-@version 0.0.1
+@version 0.0.3
 @url https://github.com/stofi/ascii-play/
 
 Distance functions are based on Inigo Quilez https://iquilezles.org/articles/distfunctions/
 
 # Older versions
 - 0.0.1: https://play.ertdfgcvb.xyz/#/1659700093933
+- 0.0.2: https://play.ertdfgcvb.xyz/#/1659704731657
+
 */
 export const settings = {
     backgroundColor: "#323132",
