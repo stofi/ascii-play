@@ -2,9 +2,10 @@
 
 ## Introduction
 
-This repository contains the play.core codebase in the `src` directory, so that the experiments can be copy pasted to the playground or run localy with `vite`.
+Since the play.core code is not ([and probably won't be](https://github.com/ertdfgcvb/play.core/pull/2#issuecomment-841070799)) available on npm, it is imported as a git submodule and then proxied from `/src` in vite. This way the programs can be exactly the same locally and in the playground.
 
 ### Running locally
+Be sure to init the submodule with `git submodule update --init`.
 
 Install dependencies:
 
@@ -45,6 +46,6 @@ Simple wave pattern based on Perlin noise. (Implementation of noise is not mine)
 ### [03. Wave Function Collapse](experiments/03-wfc.js)
 Wave function collapse experiment.
 
-[Playground](https://play.ertdfgcvb.xyz/#/1659704759466)
+[Playground](https://play.ertdfgcvb.xyz/#/1659719329521)
 
 
