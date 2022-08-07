@@ -16,21 +16,36 @@ Click to start, collapse a slot or to restart.
 */
 
 const DISABLE_FLASHING = false;
-const TILES_SINGLE = true;
+const TILES_CUSTOM = true;
+
+const TILES_SINGLE = false;
 const TILES_DOUBLE = false;
 const TILES_FULL = false;
 const TILES_DOUBLE_SINGLE = false;
 const TILES_FULL_SINGLE = false;
 
+const COLORS = {
+  deepBlue: "#112234",
+  gold: "#ffa216",
+  redWine: "#4f1528",
+};
+
+const COLOR_BG = COLORS.deepBlue;
+const COLOR_FG = COLORS.gold;
+const COLOR_1 = COLORS.gold;
+const COLOR_2 = "#0f0";
+const COLOR_3 = COLORS.redWine;
+
 export const settings = {
-  backgroundColor: "#03071e",
-  color: "#ffba08",
+  backgroundColor: COLOR_BG,
+  color: COLOR_FG,
   restoreState: false,
   fontSize: "2rem",
   // fps: 1,
 };
 
-type Socket = 0 | 1 | 2 | 3 | 4 | 5;
+// type Socket = 0 | 1 | 2 | 3 | 4 | 5;
+type Socket = string;
 
 interface Sockets {
   top: Socket;
@@ -39,49 +54,85 @@ interface Sockets {
   right: Socket;
 }
 
+type TemplateSocket = number[] | number;
+
+const templateSocketToSocket = (templateSocket: TemplateSocket): Socket => {
+  if (Array.isArray(templateSocket)) {
+    return templateSocket.slice().sort().join("");
+  }
+  return templateSocket.toString();
+};
+
 class Tile {
-  color: number | string;
+  color: number;
   char: string;
   sockets: Sockets;
   weight?: number;
   constructor(
     char: string,
-    top: Socket,
-    right: Socket,
-    bottom: Socket,
-    left: Socket,
+    top: TemplateSocket,
+    right: TemplateSocket,
+    bottom: TemplateSocket,
+    left: TemplateSocket,
     color = 0,
     weight?: number
   ) {
     this.char = char;
     this.weight = weight;
     this.sockets = {
-      top,
-      right,
-      bottom,
-      left,
+      top: templateSocketToSocket(top),
+      right: templateSocketToSocket(right),
+      bottom: templateSocketToSocket(bottom),
+      left: templateSocketToSocket(left),
     };
     this.color = color;
   }
 }
 
 type Template =
-  | [string, Socket, Socket, Socket, Socket, number, number]
-  | [string, Socket, Socket, Socket, Socket, number];
+  | [
+      string,
+      TemplateSocket,
+      TemplateSocket,
+      TemplateSocket,
+      TemplateSocket,
+      number,
+      number
+    ]
+  | [
+      string,
+      TemplateSocket,
+      TemplateSocket,
+      TemplateSocket,
+      TemplateSocket,
+      number
+    ];
 
 const templates: Template[] = [[" ", 0, 0, 0, 0, 0]];
 
+if (TILES_CUSTOM) {
+  templates.push(
+    ["│", [1, 3], 0, [1, 3], 0, 1, 16],
+    ["─", 0, [1, 3], 0, [1, 3], 1, 16],
+    ["╮", 0, 0, 1, 1, 1, 4],
+    ["╭", 0, 1, 1, 0, 1, 4],
+    ["╯", 1, 0, 0, 1, 1, 4],
+    ["╰", 1, 1, 0, 0, 1, 4],
+    ["┃", 3, 0, 3, 0, 3, 2],
+    ["━", 0, 3, 0, 3, 3, 2]
+  );
+}
 if (TILES_SINGLE) {
   templates.push(
-    // ["┐", 0, 0, 1, 1, 1],
-    // ["┌", 0, 1, 1, 0, 1],
-    // ["┘", 1, 0, 0, 1, 1],
-    // ["└", 1, 1, 0, 0, 1],
-    // ["┼", 1, 1, 1, 1, 1],
-    // ["├", 1, 1, 1, 0, 1],
-    // ["┤", 1, 0, 1, 1, 1],
-    // ["┴", 1, 1, 0, 1, 1],
-    // ["┬", 0, 1, 1, 1, 1],
+    ["┐", 0, 0, 1, 1, 1],
+    ["┌", 0, 1, 1, 0, 1],
+    ["┘", 1, 0, 0, 1, 1],
+    ["└", 1, 1, 0, 0, 1],
+    ["┼", 1, 1, 1, 1, 1],
+    ["├", 1, 1, 1, 0, 1],
+    ["┤", 1, 0, 1, 1, 1],
+    ["┴", 1, 1, 0, 1, 1],
+    ["┬", 0, 1, 1, 1, 1],
     ["│", 1, 0, 1, 0, 1, 10],
     ["─", 0, 1, 0, 1, 1, 10],
     ["╮", 0, 0, 1, 1, 1],
@@ -220,8 +271,19 @@ class Library {
     if (!sockets || !sockets.length) return [...tileset];
 
     const validTiles = tileset.filter((tile) =>
-      sockets.includes(tile.sockets[Library.reverseDirection(direction)])
+      sockets.some((socket) => {
+        if (!socket.length) return false;
+        const otherSockets = tile.sockets[Library.reverseDirection(direction)];
+        if (socket.length == 1) {
+          return otherSockets.includes(socket[0]);
+        }
+        const mySockets = socket.split("");
+        return mySockets.some((mySocket) => otherSockets.includes(mySocket));
+      })
     );
+    // const validTiles = tileset.filter((tile) =>
+    //   sockets.includes(tile.sockets[Library.reverseDirection(direction)])
+    // );
     return validTiles;
   }
 
@@ -475,6 +537,7 @@ class Experience {
   running = false;
   started = false;
   frameRandom = 0;
+  enableBanner = false;
 
   handleClick(x: number, y: number) {
     this.clicked = true;
@@ -488,6 +551,7 @@ class Experience {
   }
 
   banner({ cols, rows }: Context) {
+    if (!this.enableBanner) return;
     for (let x = 0; x < cols; x++) {
       for (let y = 0; y < rows; y++) {
         const text = ["CHAOS TO ORDER", "CLICK TO START"];
@@ -557,13 +621,13 @@ class Experience {
       // slot.tiles[0].color;
       switch (slot.tiles[0].color) {
         case 1:
-          out.color = "#e85d04";
+          out.color = COLOR_1;
           break;
         case 2:
-          out.color = "#dc2f02";
+          out.color = COLOR_2;
           break;
         case 3:
-          out.color = "#9d0208";
+          out.color = COLOR_3;
           break;
         default:
           break;
