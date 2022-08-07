@@ -7,6 +7,7 @@ import * as wfcTs from "/typescript/wfc.ts";
 
 const mode = import.meta.env.MODE;
 let program = null;
+let element = document.querySelector("pre");
 switch (mode) {
     case "raymarch":
         program = raymarch;
@@ -26,7 +27,7 @@ switch (mode) {
         break;
 }
 
-Run.run(program, { element: document.querySelector("pre") })
+Run.run(program, { element })
     .then(function (e) {})
     .catch(function (e) {
         console.warn(e.message);

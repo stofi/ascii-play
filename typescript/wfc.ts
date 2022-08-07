@@ -15,8 +15,10 @@ Click to start, collapse a slot or to restart.
 
 */
 
-const DISABLE_FLASHING = false;
-const TILES_CUSTOM = true;
+const DISABLE_FLASHING = true;
+
+const TILES_3x3 = false;
+const TILES_EMOJI = true;
 
 const TILES_SINGLE = false;
 const TILES_DOUBLE = false;
@@ -24,24 +26,12 @@ const TILES_FULL = false;
 const TILES_DOUBLE_SINGLE = false;
 const TILES_FULL_SINGLE = false;
 
-const COLORS = {
-  deepBlue: "#112234",
-  gold: "#ffa216",
-  redWine: "#4f1528",
-};
-
-const COLOR_BG = COLORS.deepBlue;
-const COLOR_FG = COLORS.gold;
-const COLOR_1 = COLORS.gold;
-const COLOR_2 = "#0f0";
-const COLOR_3 = COLORS.redWine;
-
 export const settings = {
-  backgroundColor: COLOR_BG,
-  color: COLOR_FG,
-  restoreState: false,
-  fontSize: "2rem",
-  // fps: 1,
+  backgroundColor: "#1133ae",
+  color: "white",
+  // fontFamily: "Noto Color Emoji",
+  // letterSpacing: "-0.17em",
+  // fps: 10,
 };
 
 // type Socket = 0 | 1 | 2 | 3 | 4 | 5;
@@ -64,7 +54,7 @@ const templateSocketToSocket = (templateSocket: TemplateSocket): Socket => {
 };
 
 class Tile {
-  color: number;
+  color: number | string;
   char: string;
   sockets: Sockets;
   weight?: number;
@@ -96,7 +86,7 @@ type Template =
       TemplateSocket,
       TemplateSocket,
       TemplateSocket,
-      number,
+      string | number,
       number
     ]
   | [
@@ -105,21 +95,288 @@ type Template =
       TemplateSocket,
       TemplateSocket,
       TemplateSocket,
-      number
+      string | number
     ];
 
-const templates: Template[] = [[" ", 0, 0, 0, 0, 0]];
+const templates: Template[] = [
+  // [".", 0, 0, 0, 0, 0]
+];
 
-if (TILES_CUSTOM) {
+enum SocketType {
+  Water = 1,
+  WaterBeach = 2,
+  BeachWater = 3,
+  Beach = 4,
+  Land = 5,
+  Sand = 6,
+}
+// █ ▓ ▒ ░
+
+// ╱ ╲ ╳
+if (TILES_EMOJI) {
   templates.push(
-    ["│", [1, 3], 0, [1, 3], 0, 1, 16],
-    ["─", 0, [1, 3], 0, [1, 3], 1, 16],
-    ["╮", 0, 0, 1, 1, 1, 4],
-    ["╭", 0, 1, 1, 0, 1, 4],
-    ["╯", 1, 0, 0, 1, 1, 4],
-    ["╰", 1, 1, 0, 0, 1, 4],
-    ["┃", 3, 0, 3, 0, 3, 2],
-    ["━", 0, 3, 0, 3, 3, 2]
+    [
+      `░▒
+░▒`,
+      SocketType.WaterBeach,
+      SocketType.Beach,
+      SocketType.WaterBeach,
+      SocketType.Water,
+      "yellow",
+      4,
+    ],
+    [
+      `░░
+▒▒`,
+      SocketType.Water,
+      SocketType.WaterBeach,
+      SocketType.Beach,
+      SocketType.WaterBeach,
+      "yellow",
+      4,
+    ],
+    [
+      `▒░
+▒░`,
+      SocketType.BeachWater,
+      SocketType.Water,
+      SocketType.BeachWater,
+      SocketType.Beach,
+      "yellow",
+      4,
+    ],
+    [
+      `▒▒
+░░`,
+      SocketType.Beach,
+      SocketType.BeachWater,
+      SocketType.Water,
+      SocketType.BeachWater,
+      "yellow",
+      4,
+    ],
+    [
+      `▒▒
+░▒`,
+      SocketType.Beach,
+      SocketType.Beach,
+      SocketType.WaterBeach,
+      SocketType.BeachWater,
+      "yellow",
+      1,
+    ],
+    [
+      `░▒
+▒▒`,
+      SocketType.WaterBeach,
+      SocketType.Beach,
+      SocketType.Beach,
+      SocketType.WaterBeach,
+      "yellow",
+      1,
+    ],
+    [
+      `▒░
+▒▒`,
+      SocketType.BeachWater,
+      SocketType.WaterBeach,
+      SocketType.Beach,
+      SocketType.Beach,
+      "yellow",
+      1,
+    ],
+    [
+      `▒▒
+▒░`,
+      SocketType.Beach,
+      SocketType.BeachWater,
+      SocketType.BeachWater,
+      SocketType.Beach,
+      "yellow",
+      1,
+    ],
+    [
+      `░░
+▒░`,
+      SocketType.Water,
+      SocketType.Water,
+      SocketType.BeachWater,
+      SocketType.WaterBeach,
+      "yellow",
+      3,
+    ],
+    [
+      `▒░
+░░`,
+      SocketType.BeachWater,
+      SocketType.Water,
+      SocketType.Water,
+      SocketType.BeachWater,
+      "yellow",
+      2,
+    ],
+    [
+      `░▒
+░░`,
+      SocketType.WaterBeach,
+      SocketType.BeachWater,
+      SocketType.Water,
+      SocketType.Water,
+      "yellow",
+      2,
+    ],
+    [
+      `░░
+░▒`,
+      SocketType.Water,
+      SocketType.WaterBeach,
+      SocketType.WaterBeach,
+      SocketType.Water,
+      "yellow",
+      2,
+    ],
+    [
+      `░░
+░░`,
+      SocketType.Water,
+      SocketType.Water,
+      SocketType.Water,
+      SocketType.Water,
+      "blue",
+      32,
+    ],
+    [
+      `▒▒
+▒▒`,
+      SocketType.Beach,
+      SocketType.Beach,
+      SocketType.Beach,
+      SocketType.Beach,
+      "yellow",
+      8,
+    ],
+    [
+      `▒▓
+▓▒`,
+      SocketType.Land,
+      SocketType.Land,
+      SocketType.Land,
+      SocketType.Land,
+      "darkgreen",
+      4,
+    ],
+    [
+      `▓▒
+▒▓`,
+      [SocketType.Beach, SocketType.Land, SocketType.Sand],
+      [SocketType.Beach, SocketType.Land, SocketType.Sand],
+      [SocketType.Beach, SocketType.Land, SocketType.Sand],
+      [SocketType.Beach, SocketType.Land, SocketType.Sand],
+      "yellow",
+      4,
+    ],
+    [
+      `▓▓
+▓▓`,
+      [SocketType.Beach, SocketType.Land],
+      [SocketType.Beach, SocketType.Land],
+      [SocketType.Beach, SocketType.Land],
+      [SocketType.Beach, SocketType.Land],
+      "green",
+      16,
+    ]
+  );
+}
+if (TILES_3x3) {
+  templates.push(
+    [
+      `│..
+│..
+│..`,
+      [1, 3],
+      0,
+      [1, 3],
+      0,
+      1,
+      16,
+    ],
+    [
+      `───
+...
+...`,
+      0,
+      [1, 3],
+      0,
+      [1, 3],
+      1,
+      16,
+    ],
+    [
+      `╮..
+│..
+│..`,
+      0,
+      0,
+      1,
+      1,
+      1,
+      4,
+    ],
+    [
+      `╭──
+│..
+│..`,
+      0,
+      1,
+      1,
+      0,
+      1,
+      4,
+    ],
+    [
+      `╯..
+...
+...`,
+      1,
+      0,
+      0,
+      1,
+      1,
+      4,
+    ],
+    [
+      `╰──
+...
+...`,
+      1,
+      1,
+      0,
+      0,
+      1,
+      4,
+    ],
+    [
+      `┃..
+┃..
+┃..`,
+      3,
+      0,
+      3,
+      0,
+      3,
+      2,
+    ],
+    [
+      `━━━
+...
+...`,
+      0,
+      3,
+      0,
+      3,
+      3,
+      2,
+    ]
   );
 }
 if (TILES_SINGLE) {
@@ -353,7 +610,7 @@ class Slot {
       .flat();
     return options[Math.floor(Math.random() * options.length)];
   }
-  collapse(id: number | null) {
+  collapse(id: number | undefined) {
     this.collapsed = true;
     const choosen = this.tiles[id as number];
     if (!choosen) {
@@ -407,20 +664,35 @@ class WFC {
         this.set(i, j, new Slot(i, j, this.library.tiles));
       }
     }
+    console.log(this.library);
+
+    this.fillBorder(12);
   }
-  collapseSlot(x: number, y: number, id = null) {
+  fillBorder(tileId: number) {
+    const tile = this.library.tiles[tileId];
+    if (!tile) return;
+    for (let i = 0; i < this.size.width; i++) {
+      this.collapseSlot(i, 0, tileId);
+      this.collapseSlot(i, this.size.height - 1, tileId);
+    }
+    for (let i = 0; i < this.size.height; i++) {
+      this.collapseSlot(0, i, tileId);
+      this.collapseSlot(this.size.width - 1, i, tileId);
+    }
+  }
+  collapseSlot(x: number, y: number, id?: number | undefined) {
     const slot = this.get(x, y);
     if (!slot || slot.collapsed) return;
     slot.collapse(id);
     this.collapsedThisGen.push(slot);
   }
 
-  collapseSlotManual(x: number, y: number) {
+  collapseSlotManual(x: number, y: number, id?: number) {
     const slot = this.get(x, y);
     if (!slot) return;
     if (slot.collapsed) return;
     this.updateSlotOptions(x, y, slot);
-    this.collapseSlot(x, y);
+    this.collapseSlot(x, y, id);
   }
   getSortedSlots() {
     return [...this.map.values()]
@@ -451,7 +723,7 @@ class WFC {
     });
 
     if (valid.length === 0) {
-      valid.push(new Tile("x", 0, 0, 0, 0));
+      valid.push(new Tile(" ", 0, 0, 0, 0));
     }
 
     slot.tiles = valid;
@@ -538,6 +810,30 @@ class Experience {
   started = false;
   frameRandom = 0;
   enableBanner = false;
+  tileScale = 2;
+  libIndex = 0;
+  constructor() {
+    // on scroll log if up or down
+    document.addEventListener("wheel", (e) => {
+      if (e.deltaY > 0) {
+        this.increaseLibIndex();
+      } else {
+        this.decreaseLibIndex();
+      }
+    });
+  }
+  increaseLibIndex() {
+    this.libIndex++;
+    if (this.libIndex >= Library.tiles.length) {
+      this.libIndex = 0;
+    }
+  }
+  decreaseLibIndex() {
+    this.libIndex--;
+    if (this.libIndex < 0) {
+      this.libIndex = Library.tiles.length - 1;
+    }
+  }
 
   handleClick(x: number, y: number) {
     this.clicked = true;
@@ -549,7 +845,15 @@ class Experience {
     this.clicked = false;
     this.clickHandled = false;
   }
-
+  convertCoord(x2: number, y2: number) {
+    return [~~(x2 / this.tileScale), ~~(y2 / this.tileScale)];
+  }
+  getCoordDiff(x2: number, y2: number) {
+    const [x1, y1] = this.convertCoord(x2, y2);
+    const xd = x2 - x1 * this.tileScale;
+    const yd = y2 - y1 * this.tileScale;
+    return [xd, yd];
+  }
   banner({ cols, rows }: Context) {
     if (!this.enableBanner) return;
     for (let x = 0; x < cols; x++) {
@@ -568,7 +872,12 @@ class Experience {
     }
   }
 
-  pre({ cols, rows, frame }: Context, { x, y, pressed }: Cursor) {
+  pre(
+    { cols: cols2, rows: rows2, frame }: Context,
+    { x: x2, y: y2, pressed }: Cursor
+  ) {
+    const [cols, rows] = this.convertCoord(cols2, rows2);
+    const [x, y] = this.convertCoord(x2, y2);
     this.frameRandom = Math.random();
     if (this.map.size.width !== cols || this.map.size.height !== rows) {
       this.map.initialize({ cols, rows });
@@ -587,7 +896,11 @@ class Experience {
           this.banner({ cols, rows, frame });
         }
       }
-      this.map.collapseSlotManual(this.clickEnd?.x ?? 0, this.clickEnd?.y ?? 0);
+      this.map.collapseSlot(
+        this.clickEnd?.x ?? 0,
+        this.clickEnd?.y ?? 0,
+        this.libIndex
+      );
       this.clickHandled = true;
     }
     if (this.map.done) {
@@ -599,38 +912,84 @@ class Experience {
       this.handleRelease(x, y);
     }
   }
+  post(
+    { cols, rows, frame }: Context,
+    { x: x2, y: y2, pressed }: Cursor,
+    buffer: any[]
+  ) {
+    const [x, y] = this.convertCoord(x2, y2);
+    const index = ~~x * 2 + ~~y * 2 * cols;
 
-  main({ x, y }: Coord, { cols, rows }: Context) {
+    buffer[index] = {
+      char: Library.tiles[this.libIndex].char[0],
+      color: Library.tiles[this.libIndex].color,
+    };
+    buffer[index + 1] = {
+      char: Library.tiles[this.libIndex].char[1],
+      color: Library.tiles[this.libIndex].color,
+    };
+    buffer[index + cols] = {
+      char: Library.tiles[this.libIndex].char[3],
+      color: Library.tiles[this.libIndex].color,
+    };
+    buffer[index + cols + 1] = {
+      char: Library.tiles[this.libIndex].char[4],
+      color: Library.tiles[this.libIndex].color,
+    };
+    buffer[0] = { char: this.libIndex > 10 ? "1" : "0", color: 0xffffff };
+    buffer[1] = { char: this.libIndex % 10 };
+  }
+
+  main({ x: x2, y: y2 }: Coord, { cols: cols2, rows: rows2 }: Context) {
+    const [cols, rows] = this.convertCoord(cols2, rows2);
+    const [x, y] = this.convertCoord(x2, y2);
+    const [xd, yd] = this.getCoordDiff(x2, y2);
     let char = null;
 
     const slot = this.map.get(x, y);
     if (!slot || !slot.tiles || !slot.tiles.length) return " ";
     const index = !DISABLE_FLASHING ? ~~(slot.tiles.length * Math.random()) : 0;
-    const slotChar = !slot.collapsed
+    let slotChar = !slot.collapsed
       ? slot.tiles[index].char
       : slot.tiles[0].char;
-
+    if (slotChar.length > 1) {
+      const lines = slotChar.split("\n");
+      // pad the lines to the same length
+      const maxLength = Math.max(...lines.map((line) => line.length));
+      const paddedLines = lines.map((line) => line.padEnd(maxLength, " "));
+      const pLy = lines.length;
+      const pLx = paddedLines[0].length;
+      // find xd and yd in the lines, modulate by pLx and pLy
+      const yd2 = xd % pLy;
+      const xd2 = yd % pLx;
+      // get the char at the xd and yd
+      slotChar = paddedLines[xd2][yd2];
+    }
     const v =
       ~~((slot ? slot.getEntropy() / this.map.library.tiles.length : 0) * 10) /
       10;
+
     const out = {
-      char: char && !slot.collapsed ? char : v == 1 ? "" : slotChar,
+      char: char && !slot.collapsed ? char : v == 1 ? " " : slotChar,
       color: slot.collapsed ? settings.color : "gray",
     };
     if (slot.collapsed) {
       // slot.tiles[0].color;
       switch (slot.tiles[0].color) {
         case 1:
-          out.color = COLOR_1;
+          out.color = "#e85d04";
           break;
         case 2:
-          out.color = COLOR_2;
+          out.color = "#dc2f02";
           break;
         case 3:
-          out.color = COLOR_3;
+          out.color = "#9d0208";
           break;
         default:
           break;
+      }
+      if (typeof slot.tiles[0].color === "string") {
+        out.color = slot.tiles[0].color;
       }
     }
     return out;
@@ -644,4 +1003,7 @@ export function pre(context: Context, cursor: Cursor) {
 }
 export function main(coord: Coord, context: Context) {
   return experience.main(coord, context);
+}
+export function post(context: Context, cursor: Cursor, buffer: any[]) {
+  experience.post(context, cursor, buffer);
 }
