@@ -2,6 +2,7 @@ import * as Run from "/src/run.js";
 import * as raymarch from "/experiments/01-raymarch";
 import * as waves from "/experiments/02-waves";
 import * as wfc from "/experiments/03-wfc";
+import * as ui from "/experiments/04-ui";
 
 const mode = import.meta.env.MODE;
 let program = null;
@@ -14,6 +15,9 @@ switch (mode) {
         break;
     case "wfc":
         program = wfc;
+        break;
+    case "ui":
+        program = ui;
         break;
     default:
         program = raymarch;

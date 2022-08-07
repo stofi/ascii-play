@@ -4,7 +4,7 @@ body {
   margin: 0;
   font-size: 1em;
   line-height: 1.2;
-  font-family: 'Simple Console', monospace;
+  font-family: "Simple Console", monospace;
 }
 pre {
   position: absolute;

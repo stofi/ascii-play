@@ -17,8 +17,8 @@ Click to start, collapse a slot or to restart.
 
 const DISABLE_FLASHING = false;
 const TILES_SINGLE = true;
-const TILES_DOUBLE = true;
-const TILES_FULL = true;
+const TILES_DOUBLE = false;
+const TILES_FULL = false;
 const TILES_DOUBLE_SINGLE = false;
 const TILES_FULL_SINGLE = false;
 
@@ -27,7 +27,7 @@ export const settings = {
     color: "#ffba08",
     restoreState: false,
     fontSize: "2rem",
-    // fps: 10,
+    // fps: 1,
 };
 
 class Tile {
@@ -44,27 +44,21 @@ class Tile {
     }
 }
 
-const templates = [
-    [" ", 0, 0, 0, 0, 0],
-    // ["H", 0, 4, 0, 0, 0],
-    // ["E", 0, 5, 0, 4, 0],
-    // ["L", 0, 6, 0, 5, 0],
-    // ["O", 0, 0, 0, 6, 0],
-];
+const templates = [[" ", 0, 0, 0, 0, 0]];
 
 if (TILES_SINGLE) {
     templates.push(
-        ["┐", 0, 0, 1, 1, 1],
-        ["┌", 0, 1, 1, 0, 1],
-        ["┘", 1, 0, 0, 1, 1],
-        ["└", 1, 1, 0, 0, 1],
-        ["┼", 1, 1, 1, 1, 1],
-        ["├", 1, 1, 1, 0, 1],
-        ["┤", 1, 0, 1, 1, 1],
-        ["┴", 1, 1, 0, 1, 1],
-        ["┬", 0, 1, 1, 1, 1],
-        ["│", 1, 0, 1, 0, 1, 100],
-        ["─", 0, 1, 0, 1, 1, 100],
+        // ["┐", 0, 0, 1, 1, 1],
+        // ["┌", 0, 1, 1, 0, 1],
+        // ["┘", 1, 0, 0, 1, 1],
+        // ["└", 1, 1, 0, 0, 1],
+        // ["┼", 1, 1, 1, 1, 1],
+        // ["├", 1, 1, 1, 0, 1],
+        // ["┤", 1, 0, 1, 1, 1],
+        // ["┴", 1, 1, 0, 1, 1],
+        // ["┬", 0, 1, 1, 1, 1],
+        ["│", 1, 0, 1, 0, 1, 10],
+        ["─", 0, 1, 0, 1, 1, 10],
         ["╮", 0, 0, 1, 1, 1],
         ["╭", 0, 1, 1, 0, 1],
         ["╯", 1, 0, 0, 1, 1],
@@ -82,8 +76,8 @@ if (TILES_DOUBLE) {
         ["╣", 2, 0, 2, 2, 2],
         ["╩", 2, 2, 0, 2, 2],
         ["╦", 0, 2, 2, 2, 2],
-        ["║", 2, 0, 2, 0, 2, 60],
-        ["═", 0, 2, 0, 2, 2, 60]
+        ["║", 2, 0, 2, 0, 2, 10],
+        ["═", 0, 2, 0, 2, 2, 10]
     );
 }
 if (TILES_DOUBLE_SINGLE) {
@@ -119,8 +113,8 @@ if (TILES_FULL) {
         ["┫", 3, 0, 3, 3, 3],
         ["┻", 3, 3, 0, 3, 3],
         ["┳", 0, 3, 3, 3, 3],
-        ["┃", 3, 0, 3, 0, 3, 40],
-        ["━", 0, 3, 0, 3, 3, 40]
+        ["┃", 3, 0, 3, 0, 3, 10],
+        ["━", 0, 3, 0, 3, 3, 10]
     );
 }
 if (TILES_FULL_SINGLE) {
@@ -313,6 +307,7 @@ class WFC {
 
     collapseSlotManual(x, y) {
         const slot = this.get(x, y);
+        if (!slot) return;
         if (slot.collapsed) return;
         this.updateSlotOptions(x, y, slot);
         this.collapseSlot(x, y);
@@ -398,9 +393,23 @@ class WFC {
 class Experience {
     map = new WFC();
     clicked = false;
+    clickStart = undefined;
+    clickEnd = undefined;
+    clickHandled = true;
     running = false;
     started = false;
     frameRandom = 0;
+
+    handleClick(x, y) {
+        this.clicked = true;
+        this.clickStart = { x: ~~x, y: ~~y };
+        this.clickEnd = undefined;
+    }
+    handleRelease(x, y) {
+        this.clickEnd = { x: ~~x, y: ~~y };
+        this.clicked = false;
+        this.clickHandled = false;
+    }
 
     banner({ cols, rows }) {
         for (let x = 0; x < cols; x++) {
@@ -429,23 +438,25 @@ class Experience {
         if (this.running) {
             this.map.step();
         }
-        if (pressed) {
-            this.clicked = true;
-        } else if (this.clicked && !this.running) {
-            this.running = true;
-            this.clicked = false;
-            this.started = true;
-            if (this.map.done) {
-                this.map.initialize({ cols, rows });
-                this.banner({ cols, rows, frame });
+        if (!this.clickHandled) {
+            if (!this.running) {
+                this.running = true;
+                this.started = true;
+                if (this.map.done) {
+                    this.map.initialize({ cols, rows });
+                    this.banner({ cols, rows, frame });
+                }
             }
-            this.map.collapseSlotManual(~~x, ~~y);
-        } else if (this.clicked && this.running) {
-            this.map.collapseSlotManual(~~x, ~~y);
-            this.clicked = false;
+            this.map.collapseSlotManual(this.clickEnd.x, this.clickEnd.y);
+            this.clickHandled = true;
         }
         if (this.map.done) {
             this.running = false;
+        }
+        if (pressed && !this.clicked) {
+            this.handleClick(x, y);
+        } else if (this.clicked) {
+            this.handleRelease(x, y);
         }
     }
 
