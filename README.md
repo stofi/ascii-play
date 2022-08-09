@@ -46,6 +46,6 @@ Simple wave pattern based on Perlin noise. (Implementation of noise is not mine)
 ### [03. Wave Function Collapse](experiments/03-wfc.js)
 Wave function collapse experiment.
 
-[Playground](https://play.ertdfgcvb.xyz/#/1659719329521)
+[Playground](https://play.ertdfgcvb.xyz/#/1660067499833)
 
 
