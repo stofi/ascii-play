@@ -594,7 +594,7 @@ class Experience {
     }
 
     pre({ cols: cols2, rows: rows2, frame }, { x: x2, y: y2, pressed }) {
-        const [cols, rows] = this.convertCoord(cols2, rows2);
+        const [cols, rows] = this.convertCoord(cols2 + 1, rows2 + 1);
         const [x, y] = this.convertCoord(x2, y2);
         this.frameRandom = Math.random();
 
