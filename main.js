@@ -1,10 +1,11 @@
-import * as Run from "/src/run.js";
 import * as raymarch from "/experiments/01-raymarch";
 import * as waves from "/experiments/02-waves";
 import * as wfc from "/experiments/03-wfc";
+import * as Run from "/src/run.js";
 
 const mode = import.meta.env.MODE;
 let program = null;
+
 switch (mode) {
     case "raymarch":
         program = raymarch;

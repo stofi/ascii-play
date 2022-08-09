@@ -3,6 +3,7 @@
 @title  Waves
 @version 0.0.2
 @url https://github.com/stofi/ascii-play/
+@desc A simple ASCII art generator for waves using perlin noise.
 
 # Older versions
 - 0.0.0: https://play.ertdfgcvb.xyz/#/1659700118738
@@ -33,6 +34,7 @@ const perlinNoise3d = (function () {
     var sinLUT = new Array(SINCOS_LENGTH);
     var cosLUT = new Array(SINCOS_LENGTH);
     var DEG_TO_RAD = Math.PI / 180.0;
+
     for (var i = 0; i < SINCOS_LENGTH; i++) {
         sinLUT[i] = Math.sin(i * DEG_TO_RAD * SINCOS_PRECISION);
         cosLUT[i] = Math.cos(i * DEG_TO_RAD * SINCOS_PRECISION);
@@ -62,6 +64,7 @@ const perlinNoise3d = (function () {
                     c = 1013904223,
                     seed,
                     z;
+
                 return {
                     setSeed: function (val) {
                         // pick a random seed if val is undefined or null
@@ -75,6 +78,7 @@ const perlinNoise3d = (function () {
                     rand: function () {
                         // define the recurrence relationship
                         z = (a * z + c) % m;
+
                         // return a float in [0, 1)
                         // if z = m then z / m = 0 therefore (z % m) / m < 1 always
                         return z / m;
@@ -84,9 +88,11 @@ const perlinNoise3d = (function () {
 
             lcg.setSeed(seed);
             this.perlin = new Array(PERLIN_SIZE + 1);
+
             for (var i = 0; i < PERLIN_SIZE + 1; i++) {
                 this.perlin[i] = lcg.rand();
             }
+
             return this;
         },
 
@@ -96,6 +102,7 @@ const perlinNoise3d = (function () {
 
             if (this.perlin == null) {
                 this.perlin = new Array(PERLIN_SIZE + 1);
+
                 for (var i = 0; i < PERLIN_SIZE + 1; i++) {
                     this.perlin[i] = Math.random();
                 }
@@ -104,9 +111,11 @@ const perlinNoise3d = (function () {
             if (x < 0) {
                 x = -x;
             }
+
             if (y < 0) {
                 y = -y;
             }
+
             if (z < 0) {
                 z = -z;
             }
@@ -141,6 +150,7 @@ const perlinNoise3d = (function () {
                 n1 = this.perlin[of & PERLIN_SIZE];
                 n1 += rxf * (this.perlin[(of + 1) & PERLIN_SIZE] - n1);
                 n2 = this.perlin[(of + PERLIN_YWRAP) & PERLIN_SIZE];
+
                 n2 +=
                     rxf *
                     (this.perlin[(of + PERLIN_YWRAP + 1) & PERLIN_SIZE] - n2);
@@ -150,6 +160,7 @@ const perlinNoise3d = (function () {
                 n2 = this.perlin[of & PERLIN_SIZE];
                 n2 += rxf * (this.perlin[(of + 1) & PERLIN_SIZE] - n2);
                 n3 = this.perlin[(of + PERLIN_YWRAP) & PERLIN_SIZE];
+
                 n3 +=
                     rxf *
                     (this.perlin[(of + PERLIN_YWRAP + 1) & PERLIN_SIZE] - n3);
@@ -170,15 +181,18 @@ const perlinNoise3d = (function () {
                     xi++;
                     xf--;
                 }
+
                 if (yf >= 1.0) {
                     yi++;
                     yf--;
                 }
+
                 if (zf >= 1.0) {
                     zi++;
                     zf--;
                 }
             }
+
             return r;
         },
     };
@@ -192,6 +206,7 @@ const getShade = (f, pattern = "█▇▆▅▄▃▂▁") => {
 
     if (index < 0) index = 0;
     if (index >= pattern.length) index = pattern.length - 1;
+
     return pattern[index];
 };
 
@@ -209,6 +224,7 @@ const mapRange = (
         if (value < min1) value = min1;
         if (value > max1) value = max1;
     }
+
     return min2 + ((value - min1) * (max2 - min2)) / (max1 - min1);
 };
 
@@ -240,11 +256,13 @@ export function main(coord, context) {
     const { x, y } = coord;
     const nx = (x / context.cols) * scale;
     const ny = (y / context.rows) * scale;
+
     const noise = Math.pow(
         p3d.get(nx, ny, t * options.frequency * options.amplitude),
         options.power
     );
     const x1 = x * options.waveFrequency;
+
     const wave =
         Math.sin(
             x1 +
@@ -253,6 +271,7 @@ export function main(coord, context) {
         ) *
             0.5 +
         0.5;
+
     // return getShade(mapRange(noise, 0.5, 1)) ?? " ";
     return getShade(wave) ?? " ";
 }

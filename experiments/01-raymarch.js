@@ -3,6 +3,7 @@
 @title  Raymarch
 @version 0.0.3
 @url https://github.com/stofi/ascii-play/
+@desc Signed distance field raymarching.
 
 Distance functions are based on Inigo Quilez https://iquilezles.org/articles/distfunctions/
 
@@ -11,6 +12,10 @@ Distance functions are based on Inigo Quilez https://iquilezles.org/articles/dis
 - 0.0.2: https://play.ertdfgcvb.xyz/#/1659704731657
 
 */
+import * as DrawBox from "/src/modules/drawbox.js";
+import * as Vec2 from "/src/modules/vec2.js";
+import * as Vec3 from "/src/modules/vec3.js";
+
 export const settings = {
     backgroundColor: "#323132",
     color: "#fffefc",
@@ -19,16 +24,13 @@ export const settings = {
     restoreState: false,
 };
 
-import * as Vec3 from "/src/modules/vec3.js";
-import * as Vec2 from "/src/modules/vec2.js";
-import * as DrawBox from "/src/modules/drawbox.js";
-
 const getShade = (f, pattern) => {
     f *= -1;
     let index = Math.floor((pattern.length - 1) * f);
 
     if (index < 0) return null;
     if (index >= pattern.length) index = pattern.length - 1;
+
     return pattern[index];
 };
 
@@ -60,6 +62,7 @@ const vec3RotationMatrix = (v, a) => {
     const vx = v.x;
     const vy = v.y;
     const vz = v.z;
+
     return [
         c + vx * vx * (1 - c),
         vx * vy * (1 - c) - vz * s,
@@ -79,18 +82,22 @@ const vec3RotationMatrix = (v, a) => {
         1,
     ];
 };
+
 const vec3Transform = (v, m) => {
     const vx = v.x;
     const vy = v.y;
     const vz = v.z;
+
     return Vec3.vec3(
         vx * m[0] + vy * m[4] + vz * m[8],
         vx * m[1] + vy * m[5] + vz * m[9],
         vx * m[2] + vy * m[6] + vz * m[10]
     );
 };
+
 const vec3Rotate = (v, a, axis) => {
     const m = vec3RotationMatrix(axis, a);
+
     return vec3Transform(v, m);
 };
 const sdSphere = (p, s) => Vec3.length(p) - s;
@@ -101,6 +108,7 @@ const sdTorus = (p, t) => {
     const tx = t.x;
     const ty = t.y;
     const q = Vec2.vec2(Vec2.length(pxz) - tx, py);
+
     return Vec2.length(q) - ty;
 };
 
@@ -123,6 +131,7 @@ const sdRoundBox = (p, b, r) => {
     const qx = Vec3.vec3(q.x, q.x, q.x);
     const qy = Vec3.vec3(q.y, q.y, q.y);
     const qz = Vec3.vec3(q.z, q.z, q.z);
+
     return Math.abs(
         Vec3.length(Vec3.max(q, Vec3.vec3(0, 0, 0))) +
             Vec3.length(
@@ -135,11 +144,14 @@ const sdRoundBox = (p, b, r) => {
 const mix = (a, b, k) => {
     return a * (1 - k) + b * k;
 };
+
 const clamp = (a, b, c) => {
     return Math.max(b, Math.min(a, c));
 };
+
 const smin = (a, b, k) => {
     const h = clamp(0.5 + (0.5 * (b - a)) / k, 0, 1);
+
     return mix(b, a, h) - k * h * (1 - h);
 };
 
@@ -160,12 +172,15 @@ const _sdf = (p, t = 0) => {
     d = smin(d, torus, 0.5);
     // closest object
     let name = null;
+
     if (torus < sphere && torus < box) {
         name = "torus";
     }
+
     if (sphere < torus && sphere < box) {
         name = "sphere";
     }
+
     if (box < sphere && box < torus) {
         name = "box";
     }
@@ -181,11 +196,13 @@ const vec3toHexColor = (v) => {
     const r = Math.floor(v.x * 127) + 128;
     const g = Math.floor(v.y * 127) + 128;
     const b = Math.floor(v.z * 127) + 128;
+
     const pad = (n) => {
         return n.toString(16).padStart(2, "0");
     };
     const hex = `#${pad(r)}${pad(g)}${pad(b)}`;
     const isValid = /^#[0-9a-f]{6}$/i.test(hex);
+
     return isValid ? hex : "black";
 };
 
@@ -193,6 +210,7 @@ function raymarch(coord, context, time, pattern) {
     const symbol = typeof pattern == "object" ? pattern.default : pattern;
     const H = context.rows / 50;
     const t0 = time;
+
     const uv = Vec2.vec2(
         (coord.x + 1) / context.cols,
         (coord.y + 1) / context.rows
@@ -213,6 +231,7 @@ function raymarch(coord, context, time, pattern) {
     let color = "#fff";
     let fontWeight = 400;
     let object = "default";
+
     for (let i = 0; i < 32; i++) {
         const pos = Vec3.add(camPos, Vec3.mulN(ray, t));
         const { distance, object: oName } = _sdf(pos, t0);
@@ -224,6 +243,7 @@ function raymarch(coord, context, time, pattern) {
         max = h;
         min = h < min ? h : min;
     }
+
     if (t < tMax) {
         const pos = Vec3.add(camPos, Vec3.mulN(ray, t));
         const normal = getNormal(pos, t0);
@@ -231,8 +251,10 @@ function raymarch(coord, context, time, pattern) {
         color = vec3toHexColor(normal);
         const lightPos = Vec3.vec3(3, 5, 2);
         const diff = Vec3.dot(lightPos, normal);
+
         const objectPattern =
             typeof pattern == "object" ? pattern[object] : symbol;
+
         char =
             Math.random() > diff * 0.5 + 0.5
                 ? objectPattern.toLowerCase()
@@ -240,6 +262,7 @@ function raymarch(coord, context, time, pattern) {
         color = vec3toHexColor(normal);
         fontWeight = diff > 2 ? 700 : diff < -2 ? 300 : 400;
     }
+
     return { char, color, fontWeight };
 }
 
@@ -251,13 +274,16 @@ function fillPattern(coord, context, pattern = "ABC") {
             } else {
                 acc[acc.length - 1] += c;
             }
+
             return acc;
         }, []);
         pattern = lines[coord.y % lines.length];
     }
     const index = (coord.x + coord.y) % pattern.length;
+
     return pattern[index];
 }
+
 export function main(coord, context) {
     const t0 = context.time * 0.0003 * (settings.fps / 30);
     let char = " ";
@@ -265,6 +291,7 @@ export function main(coord, context) {
     let boxPattern = fillPattern(coord, context, "BOX");
     let spherePattern = fillPattern(coord, context, "SPHERE");
     let torusPattern = fillPattern(coord, context, "TORUS");
+
     char = raymarch(coord, context, t0, {
         default: rayMarchPattern,
         box: boxPattern,
@@ -283,6 +310,7 @@ export function main(coord, context) {
                   color: "white",
                   fontWeight: 400,
               };
+
     return colorEnabled ? char : char.char ? char.char : char;
 }
 
@@ -302,6 +330,7 @@ Frame: ${context.frame}`;
     const x = 2;
     const y = 1;
     colorWasDisabled = false;
+
     // curor in bounds
     const cursorInBounds =
         cursor.x >= x &&
@@ -315,6 +344,7 @@ Frame: ${context.frame}`;
     if (!wasPressed && cursorPressed) {
         wasPressed = true;
         console.log("pressed");
+
         if (!guiEnabled) {
             if (cursorLine == 0) {
                 guiEnabled = true;
@@ -327,6 +357,7 @@ Frame: ${context.frame}`;
             guiEnabled = false;
         }
     }
+
     if (!cursor.pressed) {
         wasPressed = false;
     }
@@ -347,6 +378,7 @@ Frame: ${context.frame}`;
     const target = buffer;
     const targetCols = context.cols;
     const targetRows = context.rows;
+
     if (guiEnabled) {
         DrawBox.drawBox(text, style, target, targetCols, targetRows);
     } else {
